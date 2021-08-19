@@ -1,0 +1,6 @@
+beautifulsoup4
+dash
+dash-bootstrap-components
+numpy
+pandas
+requests
