@@ -1,7 +1,8 @@
 beautifulsoup4
 dash
 dash-bootstrap-components
+dash-auth
 numpy
 pandas
 requests
-urllib<2
+urllib3<2

@@ -4,6 +4,7 @@ import dash
 import dash_bootstrap_components as dbc
 from dash import dcc
 from dash import html
+import dash_auth
 # from dash.dash_table.Format
 
 from app import app
@@ -11,16 +12,18 @@ from app import app
 from dash.dependencies import Input, Output
 from dash.dash_table.Format import Format, Scheme, Sign, Symbol
 
+import json
 import home
-# import adp
-# import aos_financing_app
-# import aos_disputes
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     html.Div(id='page-content')
 ])
 
+auth = dash_auth.BasicAuth(
+    app,
+    json.load(open("./.secrets.json", "r"))
+)
 
 @app.callback(Output('page-content', 'children'),
               [Input('url', 'pathname')])
