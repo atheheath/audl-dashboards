@@ -12,11 +12,12 @@ import re
 import pandas as pd
 from datetime import datetime
 import time
+import json
+import urllib.parse
 
 currentDate = datetime.now()
 
 urls = []
-teams = []
 
 """ 
 2021 AUDL Teams:
@@ -48,7 +49,7 @@ rush
 teamsURL = 'https://theaudl.com/league/teams'
 
 #Base url used to create full link to stats
-statspage = 'https://audl-stat-server.herokuapp.com/stats-pages/'
+statspage = 'https://www.backend.audlstats.com/stats-pages/game/'
 
 
 def getTeams():
@@ -65,53 +66,45 @@ def getTeams():
     teamscard = table.find_all('div',style='text-align:center')
 
     #For each team in the league find the teams identifier and store in list
+    teams = []
     for team in teamscard:
-        teamname = team.find(href=True)['href'][1:]
+        teamname = team.find(href=True)['href'].rsplit('/', 1)[-1]
         teams.append(teamname)
 
     return teams
 
-def getStats(teams):
+
+def create_game_url_from_game_id(game_id):
+    return urllib.parse.urljoin(statspage, game_id)
+
+
+def getStats(team):
     #AUDL schedule url
-    AUDLSchedule = f'https://theaudl.com/{teams}/schedule'
+    AUDLSchedule = f"https://www.backend.audlstats.com/web-api/games?current&teamID={team}"
 
     #Request the AUDL schedule site to get the rest of the URL information needed for the full stats page
     site = requests.get(AUDLSchedule)
 
-    #Create a soup object
-    soup = BeautifulSoup(site.content, 'html.parser')
+    games = json.loads(site.content)["games"]
 
-    #Find the div used to house the game data for every game on schedule
-    schedule = soup.find('div',class_='view-content')
-
-    #Find game data for each game and store in list
-    games = schedule.find_all('div', attrs={'class': re.compile('^views-row views-row.*')})
-
+    urls = []
     #For each game on the schedule find the unique identifier for each specific games full stats page
     for game in games:
-        #Find the span where the unique identifier is located
-        link_desc = game.find('span',class_='audl-schedule-gc-link')
+        urls.append(create_game_url_from_game_id(game["gameID"]))
+        # #Reformat the data of the game into a usable formate
+        # datesplit = hrefsplit[3].split('-')[0:3]
+        # date = datesplit[0]+'/'+datesplit[1]+'/'+datesplit[2]
 
-        #Find the name of the href
-        hreftag = link_desc.find(href=True)['href']
+        # #Store the game date in a usable formate
+        # gameDate = datetime.strptime(date,'%Y/%m/%d')
 
-        #Parse the name and store the unique identifier
-        hrefsplit = hreftag.split('/')
+        # #Compate the game date with today's date and ignore if the game has not happened yet
+        # if gameDate<currentDate:
+        #     #Finalize the format for unique identifier
+        #     directory = hrefsplit[2]+'/'+hrefsplit[3]
 
-        #Reformat the data of the game into a usable formate
-        datesplit = hrefsplit[3].split('-')[0:3]
-        date = datesplit[0]+'/'+datesplit[1]+'/'+datesplit[2]
-
-        #Store the game date in a usable formate
-        gameDate = datetime.strptime(date,'%Y/%m/%d')
-
-        #Compate the game date with today's date and ignore if the game has not happened yet
-        if gameDate<currentDate:
-            #Finalize the format for unique identifier
-            directory = hrefsplit[2]+'/'+hrefsplit[3]
-
-            #Concatenate the unique identifier to the end of the base url and append to a list
-            urls.append(statspage+directory)
+        #     #Concatenate the unique identifier to the end of the base url and append to a list
+        #     urls.append(statspage+directory)
 
     return urls
 

@@ -572,11 +572,30 @@ def create_possessions(points):
 
         plays = [x for x in point.play_by_play]
 
-        # get rid of the first play if there's a pull. There will not be a 
+        # check to see how many pulls are in a point
+        num_pulls = len([play for play in plays if isinstance(play, Pull)])
+        if num_pulls > 1:
+            # make sure that all pulls are in the front. If we convert it to a binary representation of 0 and 1,
+            # then we should expect the series to look like 1, 1, 0, 0, 0
+            # if it looks like 1, 0, 1, 0, 0, then that's bad. 
+            # we check to see if any of the running diffs is greater than 0 (i+1 - i)
+            is_pull_array = [int(isinstance(play, Pull)) for play in plays]
+            diffs = [y - x for (x, y) in zip(is_pull_array, is_pull_array[1:])]
+            if len([x for x in diffs if x > 0]) > 0:
+                raise ValueError(f"Point has pulls that are not all at front. point_index: {point_index}")
+
+
+        elif num_pulls == 1:
+            if not isinstance(plays[0], Pull):
+                raise ValueError(f"There is a pull this point, but it's not the first play. point_index: {point_index}")
+
+        else:
+            pass
+
+        # get rid of all of the pulls. There will not be a 
         # pull in cases where offsides happen and the other team gets
         # the disc at the brick
-        if isinstance(plays[0], Pull):
-            plays.pop(0)  # get rid of pull info
+        plays = [play for play in plays if not isinstance(play, Pull)]
 
         current_o_index = 0
         current_d_index = -1
@@ -619,12 +638,26 @@ class ParsedEvent:
     possessions: List[Possession]
 
 
+def filter_empty_points(points):
+    """Filter out points where there is not an entry with a roster"""
+    filtered_points = []
+    for point in points:
+        events_with_roster = [event for event in point if "l" in event]
+        if len(events_with_roster) > 0:
+            filtered_points.append(point)
+
+    return filtered_points
+
+
 def parse_events(game_info):
     home_events = json.loads(game_info["tsgHome"]["events"])
     away_events = json.loads(game_info["tsgAway"]["events"])
 
     away_point_events = events_per_point(away_events)
     home_point_events = events_per_point(home_events)
+
+    away_point_events = filter_empty_points(away_point_events)
+    home_point_events = filter_empty_points(home_point_events)
 
     roster_id_map = get_roster_id_map(game_info)
 

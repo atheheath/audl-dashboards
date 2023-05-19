@@ -2,14 +2,14 @@
 import argparse
 import dash
 import dash_bootstrap_components as dbc
-import dash_core_components as dcc
-import dash_html_components as html
-import dash_table
+from dash import dcc
+from dash import html
+# from dash.dash_table.Format
 
 from app import app
 
 from dash.dependencies import Input, Output
-from dash_table.Format import Format, Scheme, Sign, Symbol
+from dash.dash_table.Format import Format, Scheme, Sign, Symbol
 
 import home
 # import adp
@@ -26,6 +26,7 @@ app.layout = html.Div([
               [Input('url', 'pathname')])
 def display_page(pathname):
     print("Updating display page")
+    print(f"root pathname: {pathname}")
     if pathname in ['/', '', '#', '/home']:
         return home.layout()
     # elif pathname == '/adp':

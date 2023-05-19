@@ -4,3 +4,4 @@ dash-bootstrap-components
 numpy
 pandas
 requests
+urllib<2
