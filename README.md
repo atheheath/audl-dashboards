@@ -33,3 +33,7 @@ Event Index
 19: Drop
 20: Throw
 22: Goal
+
+
+## Deployment
+Procfile and gunicorns are for deployment to heroku I suppose
