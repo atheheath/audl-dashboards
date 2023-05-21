@@ -280,6 +280,7 @@ def handle_next_step(
         current_d_event = starting_d_event[d_index]
         current_d_index = int(d_index)
 
+        # end of quarter?
         if current_o_event["t"] in [25, 26] or current_d_event["t"] in [25, 26]:
             action = None
             return return_indices(
@@ -294,6 +295,7 @@ def handle_next_step(
         current_d_event: Dict = starting_o_event[o_index]
         current_d_index = int(o_index)
 
+        # end of quarter?
         if current_o_event["t"] in [25, 26] or current_d_event["t"] in [25, 26]:
             action = None
             return return_indices(
@@ -524,6 +526,8 @@ def create_play_by_play(all_points, roster_id_map):
 
             except Exception as e:
                 print(f"Point: {all_points[i]}")
+                print(f"Home events: {all_points[i].home_point_event}")
+                print(f"Away events: {all_points[i].away_point_event}")
                 print(f"starting_o_event: {starting_o_event}")
                 print(f"starting_d_event: {starting_d_event}")
                 print(f"new_o_index: {new_o_index}")
