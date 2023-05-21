@@ -1,2 +1,2 @@
-pushd src/ && python index.py -p 8889
+export $(cat .env | xargs) && pushd src/ && python app.py
 popd
