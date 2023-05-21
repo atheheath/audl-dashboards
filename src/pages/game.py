@@ -3,14 +3,14 @@ import dash_bootstrap_components as dbc
 from dash import dcc
 from dash import html
 
-import navbar
+from . import navbar
 import numpy as np
 import os
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-from app import app
+# from app import app
 # from common import DataHolder, cache_dir, generate_dash_table, load_data
 from dash.dependencies import Input, Output
 from plotly.subplots import make_subplots

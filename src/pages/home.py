@@ -1,30 +1,33 @@
 from ast import parse
-import common
+from . import common
 import dash
 import dash_bootstrap_components as dbc
 from dash import dcc
-from dash import html
+from dash import html, callback
 # import home_queries
-import navbar
+from . import navbar
 import numpy as np
 import os
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-import munging
+from . import munging
 import posixpath
 
 from functools import lru_cache
 
-import game
+from . import game
 from dataclasses import dataclass
 
-from app import app
+# from app import app
+
 # from common import DataHolder, cache_dir, generate_dash_table, load_data
 from dash.dependencies import Input, Output
 from plotly.subplots import make_subplots
 
-from get_audl_stats import get_audl_stat_urls
+from . import get_audl_stats as gas
+
+dash.register_page(__name__, path="/home")
 
 @dataclass
 class DataHolder:
@@ -40,7 +43,7 @@ fig_field_plot = game.plot_field()
 
 @lru_cache()
 def get_game_urls():
-    return list(sorted(get_audl_stat_urls()))
+    return list(sorted(gas.get_audl_stat_urls()))
 
 
 all_game_urls = get_game_urls()
@@ -109,16 +112,12 @@ def layout():
     ])
 
 
-@app.callback(
-    [
+@callback(
         # Output("home-game-info", "data"),
         # Output("fig-field-plot", "figure"),
-        Output('live-update-text', 'children'),
-        Output('fig-slider-index', 'children')
-    ],
-    [
-        dash.dependencies.Input('demo-dropdown', 'value')
-    ]
+    Output(component_id='live-update-text', component_property='children'),
+    Output(component_id='fig-slider-index', component_property='children'),
+    Input('demo-dropdown', 'value')
 )
 def update_game_data(value):
     if value is None:
@@ -140,9 +139,7 @@ def update_game_data(value):
         
         game_info.data = munging.ParsedEvent(*parsed_event)
 
-        return [
-            [html.Span(f"Game is {value}"), html.Span(f"Num possessions is {len(game_info.data.possessions)}")],
-            dcc.Slider(
+        return [html.Span(f"Game is {value}"), html.Span(f"Num possessions is {len(game_info.data.possessions)}")], dcc.Slider(
                 id='fig-slider',
                 min=1,
                 max=len(game_info.data.possessions),
@@ -151,27 +148,21 @@ def update_game_data(value):
                 marks={1: '1', len(game_info.data.possessions): str(len(game_info.data.possessions))},
                 updatemode='drag',
             )
-        ]
+        
 
 
-@app.callback(
-    [
-        # Output("home-game-info", "data"),
-        Output("fig-field-plot", "figure"),
-        # Output('example-graph', 'extendData')
-    ],
-    [
-        Input('fig-slider', 'value')
-    ]
+@callback(
+    Output("fig-field-plot", "figure"),
+    Input('fig-slider', 'value')
 )
 def update_possession_plot(value):
     if value == -1:  # happens when first loading
-        return [fig_field_plot]
+        return fig_field_plot
 
     else:
 
         fig = game.plot_field()
         fig = game.plot_possession(fig, game_info.data.possessions[value - 1])
 
-        return [fig]
+        return fig
 

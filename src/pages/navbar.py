@@ -2,16 +2,16 @@ import dash_bootstrap_components as dbc
 
 from dash.dependencies import Input, Output, State
 
-from app import app
+# from app import app
 
-import common
+from . import common
 
 
 def navbar():
     # make a reuseable dropdown for the different examples
     dropdown = dbc.DropdownMenu(
         children=[
-            dbc.DropdownMenuItem(dbc.NavLink("Home", href="/home")),
+            dbc.DropdownMenuItem(dbc.NavLink("Home", href="/home/new")),
         ] + [
             dbc.DropdownMenuItem(dbc.NavLink(f"{base_url}", href=f"/{base_url}"))
             for base_url in common.sol_games()

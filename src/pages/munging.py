@@ -1,5 +1,5 @@
 from typing import Union, Dict, List, Tuple
-import common
+from . import common
 import json
 import requests
 
