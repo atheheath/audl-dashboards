@@ -1,2 +1,2 @@
-export $(cat .env | xargs) && pushd src/ && python app.py
+export $(cat .env | xargs) && pushd . && python app.py
 popd

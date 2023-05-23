@@ -1,31 +1,23 @@
 from ast import parse
-from . import common
+from audldb import common, game, get_audl_stats, munging
 import dash
 import dash_bootstrap_components as dbc
 from dash import dcc
 from dash import html, callback
-# import home_queries
-from . import navbar
 import numpy as np
 import os
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from . import munging
 import posixpath
 
 from functools import lru_cache
 
-from . import game
 from dataclasses import dataclass
 
-# from app import app
 
-# from common import DataHolder, cache_dir, generate_dash_table, load_data
 from dash.dependencies import Input, Output
 from plotly.subplots import make_subplots
-
-from . import get_audl_stats as gas
 
 dash.register_page(__name__, path="/home")
 
@@ -43,7 +35,7 @@ fig_field_plot = game.plot_field()
 
 @lru_cache()
 def get_game_urls():
-    return list(sorted(gas.get_audl_stat_urls()))
+    return list(sorted(get_audl_stats.get_audl_stat_urls()))
 
 
 all_game_urls = get_game_urls()
@@ -107,10 +99,49 @@ body = dbc.Container([
 def layout():
     # load_data(data_table, cache_dir, home_queries.data_query)
     return html.Div([
-        navbar.navbar(),
+        navbar(),
         body
     ])
 
+
+def navbar():
+    # make a reuseable dropdown for the different examples
+    dropdown = dbc.DropdownMenu(
+        children=[
+            dbc.DropdownMenuItem(dbc.NavLink("Home", href="/home/new")),
+        ] + [
+            dbc.DropdownMenuItem(dbc.NavLink(f"{base_url}", href=f"/{base_url}"))
+            for base_url in common.sol_games()
+        ],
+        nav=True,
+        in_navbar=True,
+        label="Pages",
+    )
+
+    # # make a reuseable dropdown for the different examples
+    # dropdown = dbc.DropdownMenu(
+    #     children=[
+    #         dbc.DropdownMenuItem("Entry 1"),
+    #         dbc.DropdownMenuItem("Entry 2"),
+    #         dbc.DropdownMenuItem(divider=True),
+    #         dbc.DropdownMenuItem("Entry 3"),
+    #     ],
+    #     nav=True,
+    #     in_navbar=True,
+    #     label="Menu",
+    # )
+
+    # this is the default navbar style created by the NavbarSimple component
+    default = dbc.NavbarSimple(
+        # children=[home, adp],
+        children=[dropdown],
+        brand="Sol Games",
+        brand_href="/home",
+        sticky="top",
+        className="mb-5",
+    )
+
+    return default
 
 @callback(
         # Output("home-game-info", "data"),

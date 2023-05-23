@@ -3,7 +3,6 @@ import dash_bootstrap_components as dbc
 from dash import dcc
 from dash import html
 
-from . import navbar
 import numpy as np
 import os
 import pandas as pd

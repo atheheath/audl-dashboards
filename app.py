@@ -8,7 +8,8 @@ from dash import dcc
 app = dash.Dash(
     __name__, 
     external_stylesheets=[dbc.themes.BOOTSTRAP],
-    use_pages=True
+    use_pages=True,
+    pages_folder="src/audldb/pages"
 )
 
 app.config.suppress_callback_exceptions = True
